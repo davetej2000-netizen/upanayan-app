@@ -1,0 +1,778 @@
+<!DOCTYPE html>
+<html lang="gu">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
+  <title>યજ્ઞોપવીત મહોત્સવ - ઉપનયન સંસ્કાર એપ્લિકેશન</title>
+  
+  <!-- PWA Meta -->
+  <link rel="manifest" href="/static/manifest.json">
+  <meta name="theme-color" content="#D97706">
+  <meta name="apple-mobile-web-app-capable" content="yes">
+  <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
+  <link rel="icon" type="image/svg+xml" href="/static/icon.svg">
+  
+  <!-- Tailwind CSS -->
+  <script src="https://cdn.tailwindcss.com"></script>
+  <script>
+    tailwind.config = {
+      theme: {
+        extend: {
+          colors: {
+            vedic: {
+              gold: '#F59E0B',
+              saffron: '#D97706',
+              maroon: '#991B1B',
+              cream: '#FFFBEB',
+              dark: '#78350F'
+            }
+          }
+        }
+      }
+    }
+  </script>
+
+  <!-- Lucide Icons -->
+  <script src="https://unpkg.com/lucide@latest"></script>
+  <!-- QRCode.js -->
+  <script src="https://cdnjs.cloudflare.com/ajax/libs/qrcodejs/1.0.0/qrcode.min.js"></script>
+  <!-- Confetti for Task Completion Celebration -->
+  <script src="https://cdn.jsdelivr.net/npm/canvas-confetti@1.6.0/dist/confetti.browser.min.js"></script>
+
+  <link rel="stylesheet" href="/static/style.css">
+</head>
+<body class="bg-amber-50 min-h-screen text-gray-800 antialiased pb-24 selection:bg-amber-200">
+
+  <!-- Desktop wrapper to center mobile view like an app -->
+  <div class="max-w-md mx-auto min-h-screen bg-white shadow-2xl relative flex flex-col overflow-x-hidden border-x border-amber-200 app-container">
+
+    <!-- Top Live Toast for Collaborative Activity -->
+    <div id="liveToast" class="fixed top-4 left-1/2 -translate-x-1/2 z-50 w-11/12 max-w-sm hidden">
+      <div class="bg-gray-900 text-white text-xs px-4 py-2.5 rounded-full shadow-2xl flex items-center justify-between border border-amber-400/40 toast-enter">
+        <div class="flex items-center space-x-2 truncate">
+          <span class="w-2.5 h-2.5 rounded-full bg-emerald-400 animate-ping"></span>
+          <span id="toastText" class="truncate font-medium">સંદેશ</span>
+        </div>
+        <button onclick="hideToast()" class="text-gray-400 hover:text-white pl-2">✕</button>
+      </div>
+    </div>
+
+    <!-- Main Header -->
+    <header class="vedic-header-bg text-white p-4 pt-5 pb-4 shadow-lg sticky top-0 z-30">
+      <div class="flex items-center justify-between mb-2">
+        <div class="flex items-center space-x-2.5">
+          <div class="w-10 h-10 rounded-full bg-amber-100/20 backdrop-blur-sm border border-amber-300/40 flex items-center justify-center text-xl shadow-inner">
+            🪔
+          </div>
+          <div>
+            <div class="flex items-center space-x-1.5">
+              <span class="text-xs font-semibold uppercase tracking-wider text-amber-200">ૐ યજ્ઞોપવીત મહોત્સવ</span>
+              <span id="liveBadge" class="inline-flex items-center px-1.5 py-0.5 rounded-full text-[10px] font-bold bg-emerald-500/90 text-white live-indicator">
+                <span class="w-1.5 h-1.5 rounded-full bg-white mr-1"></span>
+                <span id="peerCountText">1 લાઈવ</span>
+              </span>
+            </div>
+            <h1 id="headerBoyName" class="text-lg font-bold tracking-tight text-white drop-shadow leading-tight">
+              ચિ. આરવ ઉપનયન સંસ્કાર
+            </h1>
+          </div>
+        </div>
+
+        <!-- Header Actions: Share, User Profile, Language -->
+        <div class="flex items-center space-x-1.5">
+          <!-- User Profile Name Button -->
+          <button onclick="openUserModal()" title="તમારું નામ બદલો" class="p-2 rounded-full bg-white/10 hover:bg-white/20 active:scale-95 transition text-amber-100 flex items-center text-xs space-x-1 border border-white/15">
+            <i data-lucide="user" class="w-4 h-4"></i>
+            <span id="userBadgeName" class="max-w-[65px] truncate font-medium">તમે</span>
+          </button>
+          
+          <!-- Share App Button (QR & Link) -->
+          <button onclick="openShareModal()" title="મિત્રો સાથે શેર કરો" class="p-2 rounded-full bg-amber-400 text-amber-950 font-bold hover:bg-amber-300 active:scale-95 transition shadow">
+            <i data-lucide="share-2" class="w-4 h-4"></i>
+          </button>
+        </div>
+      </div>
+
+      <!-- Quick Ceremony Info & Venue -->
+      <div class="flex items-center justify-between text-xs text-amber-100/90 pt-1 border-t border-white/15">
+        <div class="flex items-center space-x-1 truncate max-w-[240px]">
+          <i data-lucide="map-pin" class="w-3.5 h-3.5 text-amber-300 shrink-0"></i>
+          <span id="headerVenue" class="truncate">શ્રી ઉમિયા માતાજી વાડી, અમદાવાદ</span>
+        </div>
+        <button onclick="openSettingsModal()" class="text-amber-200 hover:text-white underline text-[11px] flex items-center space-x-0.5">
+          <i data-lucide="edit-3" class="w-3 h-3"></i>
+          <span id="txtEditInfo">બદલો</span>
+        </button>
+      </div>
+
+      <!-- Sacred Countdown Timer -->
+      <div class="mt-3 bg-amber-950/40 backdrop-blur-md rounded-xl p-2.5 border border-amber-300/30">
+        <div class="flex items-center justify-between text-[11px] text-amber-200 mb-1 px-1">
+          <span class="flex items-center space-x-1 font-semibold">
+            <i data-lucide="clock" class="w-3 h-3 text-amber-300"></i>
+            <span id="txtCountdownTitle">શુભ મુહૂર્ત કાઉન્ટડાઉન:</span>
+          </span>
+          <span id="countdownTargetDate" class="text-amber-100 font-medium">22 નવેમ્બર 2026</span>
+        </div>
+        <div class="grid grid-cols-4 gap-1.5 text-center text-white">
+          <div class="bg-black/25 rounded-lg py-1 border border-white/10">
+            <span id="cdDays" class="block text-base font-extrabold text-amber-300">00</span>
+            <span class="text-[9px] text-amber-200/80 uppercase">દિવસ</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-1 border border-white/10">
+            <span id="cdHours" class="block text-base font-extrabold text-amber-300">00</span>
+            <span class="text-[9px] text-amber-200/80 uppercase">કલાક</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-1 border border-white/10">
+            <span id="cdMinutes" class="block text-base font-extrabold text-amber-300">00</span>
+            <span class="text-[9px] text-amber-200/80 uppercase">મિનિટ</span>
+          </div>
+          <div class="bg-black/25 rounded-lg py-1 border border-white/10">
+            <span id="cdSeconds" class="block text-base font-extrabold text-amber-300">00</span>
+            <span class="text-[9px] text-amber-200/80 uppercase">સેકન્ડ</span>
+          </div>
+        </div>
+      </div>
+    </header>
+
+    <!-- Content Area: Render based on active tab -->
+    <main class="flex-1 p-3.5 space-y-4">
+
+      <!-- ================= TAB 1: TASKS & CHECKLIST ================= -->
+      <section id="tab-tasks" class="tab-content space-y-3">
+        <!-- Task Header & Progress -->
+        <div class="sacred-card rounded-2xl p-3.5 shadow-sm border border-amber-200">
+          <div class="flex items-center justify-between mb-2">
+            <div>
+              <h2 class="text-sm font-bold text-gray-800 flex items-center space-x-1.5">
+                <span>📋</span>
+                <span id="txtTaskTitle">કાર્યોની યાદી & રિમાઇન્ડર</span>
+              </h2>
+              <p class="text-[11px] text-gray-500" id="taskSubText">પ્રસંગની સંપૂર્ણ તૈયારીઓ અને ચેકલિસ્ટ</p>
+            </div>
+            <button onclick="openAddTaskModal()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs flex items-center space-x-1 hover:bg-amber-700 shadow-sm transition active:scale-95">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span id="txtBtnAddTask">કાર્ય ઉમેરો</span>
+            </button>
+          </div>
+
+          <!-- Progress Bar -->
+          <div class="mt-2">
+            <div class="flex items-center justify-between text-xs text-gray-600 mb-1">
+              <span>પ્રગતિ (પૂર્ણ કાર્યો)</span>
+              <span id="taskProgressPercent" class="font-bold text-amber-700">0%</span>
+            </div>
+            <div class="w-full h-2.5 bg-gray-100 rounded-full overflow-hidden border border-amber-200/60">
+              <div id="taskProgressBar" class="h-full bg-gradient-to-r from-amber-500 to-emerald-500 rounded-full transition-all duration-500" style="width: 0%"></div>
+            </div>
+            <div class="flex justify-between text-[11px] text-gray-400 mt-1">
+              <span id="taskCountCompleted">૦ પૂર્ણ</span>
+              <span id="taskCountTotal">કુલ ૦ કાર્યો</span>
+            </div>
+          </div>
+
+          <!-- Filter Pills -->
+          <div class="flex items-center space-x-1.5 mt-3 pt-2 border-t border-gray-100 overflow-x-auto pb-1 text-xs">
+            <button onclick="setTaskFilter('all')" id="btnFilterAll" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-semibold shrink-0">બધા</button>
+            <button onclick="setTaskFilter('pending')" id="btnFilterPending" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 font-medium shrink-0">બાકી</button>
+            <button onclick="setTaskFilter('completed')" id="btnFilterCompleted" class="px-2.5 py-1 rounded-lg bg-gray-100 text-gray-600 font-medium shrink-0">પૂર્ણ થયેલ</button>
+          </div>
+        </div>
+
+        <!-- Task List Container -->
+        <div id="taskListContainer" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 2: EXPENSES & BUDGET ================= -->
+      <section id="tab-expenses" class="tab-content hidden space-y-3">
+        <!-- Budget Summary Card -->
+        <div class="vedic-header-bg text-white rounded-2xl p-4 shadow-md">
+          <div class="flex items-center justify-between mb-3">
+            <div>
+              <span class="text-xs text-amber-200 uppercase font-semibold">કુલ ખર્ચ હિસાબ</span>
+              <h2 id="totalSpentAmount" class="text-2xl font-black tracking-tight text-white">₹0</h2>
+            </div>
+            <button onclick="openAddExpenseModal()" class="px-3 py-1.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs flex items-center space-x-1 shadow active:scale-95">
+              <i data-lucide="plus-circle" class="w-4 h-4"></i>
+              <span>ખર્ચ ઉમેરો</span>
+            </button>
+          </div>
+
+          <div class="grid grid-cols-2 gap-2 bg-black/20 rounded-xl p-2.5 border border-white/10 text-xs">
+            <div>
+              <span class="text-amber-200/90 block text-[10px]">લક્ષ્યાંકિત બજેટ</span>
+              <span id="targetBudgetAmount" class="font-bold text-sm text-white">₹3,50,000</span>
+            </div>
+            <div>
+              <span class="text-amber-200/90 block text-[10px]">બાકી શિલક / બેલેન્સ</span>
+              <span id="remainingBudgetAmount" class="font-bold text-sm text-emerald-300">₹0</span>
+            </div>
+          </div>
+        </div>
+
+        <!-- Expense Filter by Category -->
+        <div class="flex items-center justify-between">
+          <span class="text-xs font-bold text-gray-700">ખર્ચની યાદી</span>
+          <button onclick="window.print()" class="text-xs text-amber-700 hover:text-amber-800 flex items-center space-x-1 font-semibold">
+            <i data-lucide="printer" class="w-3.5 h-3.5"></i>
+            <span>પ્રિન્ટ / રિપોર્ટ</span>
+          </button>
+        </div>
+
+        <!-- Category Badges Filter -->
+        <div class="flex items-center space-x-1.5 overflow-x-auto pb-1 text-xs text-gray-600">
+          <button onclick="setExpenseFilter('all')" class="px-2.5 py-1 rounded-lg bg-amber-100 text-amber-800 font-semibold shrink-0">બધા</button>
+          <button onclick="setExpenseFilter('ભોજન/કેટરિંગ')" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-amber-50 shrink-0">કેટરિંગ</button>
+          <button onclick="setExpenseFilter('પૂજા/મહારાજ')" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-amber-50 shrink-0">પૂજા/દક્ષિણા</button>
+          <button onclick="setExpenseFilter('હોલ/વાડી')" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-amber-50 shrink-0">વાડી/હોલ</button>
+          <button onclick="setExpenseFilter('ડેકોરેશન')" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-amber-50 shrink-0">ડેકોરેશન</button>
+          <button onclick="setExpenseFilter('કપડાં/વસ્ત્રો')" class="px-2.5 py-1 rounded-lg bg-gray-100 hover:bg-amber-50 shrink-0">વસ્ત્રો</button>
+        </div>
+
+        <!-- Expense List Container -->
+        <div id="expenseListContainer" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 3: PROGRAM SCHEDULE & MUHURAT ================= -->
+      <section id="tab-programs" class="tab-content hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-bold text-gray-800 flex items-center space-x-1">
+              <span>🪔</span>
+              <span>વિધિ & મુહૂર્ત સમયપત્રક</span>
+            </h2>
+            <p class="text-[11px] text-gray-500">ગણેશ સ્થાપનાથી માંડી સમાવર્તન મહાપ્રસાદ</p>
+          </div>
+          <button onclick="openAddProgramModal()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs flex items-center space-x-1 shadow active:scale-95">
+            <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+            <span>કાર્યક્રમ ઉમેરો</span>
+          </button>
+        </div>
+
+        <!-- Program Timeline Container -->
+        <div id="programListContainer" class="space-y-3 relative before:absolute before:inset-0 before:left-4 before:w-0.5 before:bg-amber-200">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 4: CONTACTS & VENDORS ================= -->
+      <section id="tab-contacts" class="tab-content hidden space-y-3">
+        <div class="flex items-center justify-between">
+          <div>
+            <h2 class="text-sm font-bold text-gray-800 flex items-center space-x-1">
+              <span>👥</span>
+              <span>મહત્વના સંપર્કો & સેવાભાવીઓ</span>
+            </h2>
+            <p class="text-[11px] text-gray-500">મહારાજ, કેટરર્સ, વાડી મેનેજર, પરિવાર સંયોજકો</p>
+          </div>
+          <button onclick="openAddContactModal()" class="px-3 py-1.5 rounded-xl bg-amber-600 text-white font-bold text-xs flex items-center space-x-1 shadow active:scale-95">
+            <i data-lucide="user-plus" class="w-3.5 h-3.5"></i>
+            <span>સંપર્ક ઉમેરો</span>
+          </button>
+        </div>
+
+        <!-- Search Bar -->
+        <div class="relative">
+          <i data-lucide="search" class="w-4 h-4 text-gray-400 absolute left-3 top-1/2 -translate-y-1/2"></i>
+          <input type="text" id="contactSearchInput" oninput="renderContacts()" placeholder="નામ, હોદ્દો કે સેવા શોધો..." class="w-full pl-9 pr-3 py-2 bg-white rounded-xl border border-amber-200 text-xs focus:outline-none focus:ring-2 focus:ring-amber-500">
+        </div>
+
+        <!-- Contacts List Container -->
+        <div id="contactListContainer" class="space-y-2">
+          <!-- Rendered dynamically -->
+        </div>
+      </section>
+
+      <!-- ================= TAB 5: SHAGUN & SAMAGRI ================= -->
+      <section id="tab-shagun" class="tab-content hidden space-y-3">
+        <!-- Sub-navigation: Shagun vs Samagri -->
+        <div class="flex rounded-xl bg-amber-100 p-1 text-xs font-bold text-amber-900">
+          <button onclick="switchShagunSubTab('shagun')" id="subTabBtnShagun" class="flex-1 py-1.5 rounded-lg bg-white shadow-sm text-center">
+            🎁 ચાંદલો / ભેટ નોંધણી
+          </button>
+          <button onclick="switchShagunSubTab('samagri')" id="subTabBtnSamagri" class="flex-1 py-1.5 rounded-lg text-center text-amber-700">
+            🪔 પૂજા સામગ્રી ચેકલિસ્ટ
+          </button>
+        </div>
+
+        <!-- Sub-section A: Shagun (Chandalo) -->
+        <div id="subSectionShagun" class="space-y-3">
+          <!-- Shagun Total Banner -->
+          <div class="bg-gradient-to-r from-amber-600 to-rose-700 text-white p-3.5 rounded-2xl shadow-sm flex items-center justify-between">
+            <div>
+              <span class="text-xs text-amber-200 font-semibold">કુલ નોંધાયેલ ચાંદલો</span>
+              <h3 id="totalShagunAmount" class="text-2xl font-black">₹0</h3>
+            </div>
+            <button onclick="openAddShagunModal()" class="px-3 py-1.5 rounded-xl bg-amber-400 text-amber-950 font-bold text-xs flex items-center space-x-1 shadow active:scale-95">
+              <i data-lucide="plus" class="w-3.5 h-3.5"></i>
+              <span>ચાંદલો નોંધો</span>
+            </button>
+          </div>
+
+          <!-- Shagun List -->
+          <div id="shagunListContainer" class="space-y-2">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+
+        <!-- Sub-section B: Samagri Checklist -->
+        <div id="subSectionSamagri" class="hidden space-y-3">
+          <div class="flex items-center justify-between">
+            <div>
+              <h3 class="text-xs font-bold text-gray-700">જનોઈ વિધિ પૂજા સામગ્રી</h3>
+              <p class="text-[10px] text-gray-500">શાસ્ત્રોક્ત રીતે જરૂરી દરેક વસ્તુઓની વ્યવસ્થા</p>
+            </div>
+            <button onclick="openAddSamagriModal()" class="px-2.5 py-1 rounded-lg bg-amber-600 text-white font-bold text-xs flex items-center space-x-1">
+              <i data-lucide="plus" class="w-3 h-3"></i>
+              <span>ઉમેરો</span>
+            </button>
+          </div>
+
+          <div id="samagriListContainer" class="space-y-2">
+            <!-- Rendered dynamically -->
+          </div>
+        </div>
+      </section>
+
+      <!-- Live Recent Activity Log at Bottom of Home -->
+      <section class="mt-4 pt-3 border-t border-amber-200/80">
+        <details class="group bg-white rounded-xl border border-amber-200/80 p-2.5 text-xs">
+          <summary class="font-bold text-amber-900 cursor-pointer flex items-center justify-between list-none">
+            <span class="flex items-center space-x-1.5">
+              <span class="w-2 h-2 rounded-full bg-emerald-500"></span>
+              <span>પરિવાર અને મિત્રોની લાઈવ પ્રવૃત્તિઓ (Live Feed)</span>
+            </span>
+            <i data-lucide="chevron-down" class="w-4 h-4 text-gray-400 group-open:rotate-180 transition"></i>
+          </summary>
+          <div id="activityFeedContainer" class="mt-2 space-y-1.5 pt-2 border-t border-gray-100 max-h-48 overflow-y-auto">
+            <!-- Rendered dynamically -->
+          </div>
+        </details>
+      </section>
+
+    </main>
+
+    <!-- Bottom Navigation Bar (App Tabs) -->
+    <nav class="fixed bottom-0 max-w-md w-full bg-white/95 backdrop-blur-md border-t border-amber-200 px-2 py-2 flex justify-around items-center z-40 bottom-nav">
+      <!-- Tab 1: Tasks -->
+      <button onclick="switchTab('tasks')" id="navBtnTasks" class="flex flex-col items-center justify-center flex-1 py-1 text-amber-600 transition active:scale-90">
+        <i data-lucide="check-square" class="w-5 h-5"></i>
+        <span class="text-[10px] font-bold mt-1">કાર્યો</span>
+      </button>
+
+      <!-- Tab 2: Expenses -->
+      <button onclick="switchTab('expenses')" id="navBtnExpenses" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition active:scale-90">
+        <i data-lucide="indian-rupee" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">ખર્ચ</span>
+      </button>
+
+      <!-- Tab 3: Program Schedule -->
+      <button onclick="switchTab('programs')" id="navBtnPrograms" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition active:scale-90">
+        <i data-lucide="calendar" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">કાર્યક્રમ</span>
+      </button>
+
+      <!-- Tab 4: Contacts -->
+      <button onclick="switchTab('contacts')" id="navBtnContacts" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition active:scale-90">
+        <i data-lucide="phone-call" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">સંપર્ક</span>
+      </button>
+
+      <!-- Tab 5: Shagun / Samagri -->
+      <button onclick="switchTab('shagun')" id="navBtnShagun" class="flex flex-col items-center justify-center flex-1 py-1 text-gray-400 transition active:scale-90">
+        <i data-lucide="gift" class="w-5 h-5"></i>
+        <span class="text-[10px] font-medium mt-1">ચાંદલો</span>
+      </button>
+    </nav>
+
+    <!-- ================= MODALS ================= -->
+
+    <!-- Modal 1: Share / QR Code Modal -->
+    <div id="modalShare" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full text-center shadow-2xl border border-amber-300">
+        <div class="w-12 h-12 bg-amber-100 rounded-full flex items-center justify-center mx-auto text-amber-600 mb-2">
+          <i data-lucide="qr-code" class="w-6 h-6"></i>
+        </div>
+        <div id="shareTypeBadge" class="text-[10px] font-bold text-emerald-800 bg-emerald-100 px-2 py-0.5 rounded-full inline-block mb-1">
+          🌍 ગમે ત્યાંથી (Mobile Data / Internet લાઈવ)
+        </div>
+        <h3 class="text-base font-bold text-gray-800">મોબાઈલ પર એપ્લિકેશન ખોલો</h3>
+        <p class="text-xs text-gray-500 mt-1">મિત્રો અને પરિવારજનો પોતાના મોબાઈલ ડેટા (4G/5G/ઈન્ટરનેટ) પરથી પણ સીધા જ આ લિંકથી જોડાઈ શકે છે!</p>
+
+        <!-- QR Code Canvas Container -->
+        <div class="my-4 p-3 bg-amber-50 rounded-2xl inline-block border border-amber-200">
+          <div id="qrcodeCanvas" class="flex items-center justify-center"></div>
+        </div>
+
+        <div class="bg-gray-100 rounded-xl p-2 text-xs font-mono text-gray-700 break-all select-all mb-3 text-center" id="shareUrlDisplay">
+          http://...
+        </div>
+
+        <div class="grid grid-cols-2 gap-2 text-xs">
+          <button onclick="copyShareLink()" class="py-2.5 px-3 rounded-xl bg-amber-100 text-amber-800 font-bold hover:bg-amber-200 flex items-center justify-center space-x-1">
+            <i data-lucide="copy" class="w-4 h-4"></i>
+            <span>લિંક કોપી કરો</span>
+          </button>
+          <button onclick="shareOnWhatsApp()" class="py-2.5 px-3 rounded-xl bg-emerald-600 text-white font-bold hover:bg-emerald-700 flex items-center justify-center space-x-1">
+            <i data-lucide="message-circle" class="w-4 h-4"></i>
+            <span>વોટ્સએપ શેર</span>
+          </button>
+        </div>
+
+        <button onclick="closeModal('modalShare')" class="mt-3 w-full py-2 text-xs text-gray-500 font-semibold hover:text-gray-700">
+          બંધ કરો
+        </button>
+      </div>
+    </div>
+
+    <!-- Modal 2: User Name Modal -->
+    <div id="modalUser" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300">
+        <h3 class="text-base font-bold text-gray-800 mb-1">તમારું નામ</h3>
+        <p class="text-xs text-gray-500 mb-3">તમે કોઈ કાર્ય કે ખર્ચ ઉમેરો ત્યારે આ નામ દર્શાવવામાં આવશે.</p>
+        <input type="text" id="inputUserName" placeholder="દા.ત. રાજેશભાઈ / કાકા / મિત્ર કલ્પેશ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-amber-300 text-sm focus:outline-none focus:ring-2 focus:ring-amber-500 mb-4">
+        <div class="flex space-x-2">
+          <button onclick="saveUserName()" class="flex-1 py-2 rounded-xl bg-amber-600 text-white font-bold text-xs">સાચવો</button>
+          <button onclick="closeModal('modalUser')" class="px-4 py-2 rounded-xl bg-gray-100 text-gray-600 text-xs">રદ કરો</button>
+        </div>
+      </div>
+    </div>
+
+    <!-- Modal 3: Add Task Modal -->
+    <div id="modalAddTask" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">નવું કાર્ય ઉમેરો</h3>
+          <button onclick="closeModal('modalAddTask')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddTask(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">કાર્યનું નામ *</label>
+            <input type="text" id="taskTitleInput" required placeholder="દા.ત. ગોર મહારાજને પૂજા સામગ્રીની યાદી આપવી" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300 focus:ring-2 focus:ring-amber-500">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">શ્રેણી</label>
+              <select id="taskCategoryInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="પૂજા વિધિ">પૂજા વિધિ</option>
+                <option value="સ્થળ વ્યવસ્થા">સ્થળ વ્યવસ્થા</option>
+                <option value="કેટરિંગ">કેટરિંગ</option>
+                <option value="ખરીદી">ખરીદી</option>
+                <option value="આમંત્રણ">આમંત્રણ</option>
+                <option value="મીડિયા">ફોટો/વીડિયો</option>
+                <option value="જનરલ">જનરલ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">મહત્વ (Priority)</label>
+              <select id="taskPriorityInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="ઉચ્ચ">ઉચ્ચ (High)</option>
+                <option value="મધ્યમ" selected>મધ્યમ (Medium)</option>
+                <option value="સામાન્ય">સામાન્ય (Low)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">કોને સોંપ્યું છે? (Assigned To)</label>
+            <input type="text" id="taskAssignedInput" placeholder="દા.ત. પપ્પા, દિલીપ કાકા, મિત્ર કલ્પેશ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">પૂર્ણ કરવાની તારીખ</label>
+              <input type="date" id="taskDueDateInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">રિમાઇન્ડર સમય (Time)</label>
+              <input type="time" id="taskReminderInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            કાર્ય સેવ કરો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 4: Add Expense Modal -->
+    <div id="modalAddExpense" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">નવો ખર્ચ ઉમેરો</h3>
+          <button onclick="closeModal('modalAddExpense')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddExpense(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">ખર્ચની વિગત / નામ *</label>
+            <input type="text" id="expenseTitleInput" required placeholder="દા.ત. શ્રી રાધે કેટરર્સ એડવાન્સ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">રકમ (₹) ચૂકવી *</label>
+              <input type="number" id="expenseAmountInput" required placeholder="દા.ત. 25000" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300 font-bold">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">કુલ અંદાજિત રકમ (₹)</label>
+              <input type="number" id="expenseEstimatedInput" placeholder="દા.ત. 50000" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">શ્રેણી</label>
+              <select id="expenseCategoryInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="ભોજન/કેટરિંગ">ભોજન / કેટરિંગ</option>
+                <option value="પૂજા/મહારાજ">પૂજા / શાસ્ત્રીજી દક્ષિણા</option>
+                <option value="હોલ/વાડી">હોલ / વાડી ભાડું</option>
+                <option value="ડેકોરેશન">ડેકોરેશન & સાઉન્ડ</option>
+                <option value="કપડાં/વસ્ત્રો">કપડાં & જનોઈ વસ્ત્રો</option>
+                <option value="ફોટો-વીડિયો">ફોટો & વીડિયોગ્રાફી</option>
+                <option value="આમંત્રણ">આમંત્રણ & મીઠાઈ</option>
+                <option value="અન્ય">અન્ય પરચુરણ</option>
+              </select>
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">ચૂકવણી સ્થિતિ</label>
+              <select id="expenseStatusInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="ચુકવાઈ ગયું">ચુકવાઈ ગયું (Paid)</option>
+                <option value="ભાગશઃ ચૂકવણી">ભાગશઃ ચૂકવણી (Advance)</option>
+                <option value="બાકી">બાકી (Pending)</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">કોણે ચૂકવ્યા? (Paid By)</label>
+              <input type="text" id="expensePaidByInput" placeholder="દા.ત. પપ્પા, દિલીપભાઈ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">ચૂકવણી મોડ</label>
+              <select id="expenseModeInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="રોકડ">રોકડ (Cash)</option>
+                <option value="UPI">Google Pay / PhonePe (UPI)</option>
+                <option value="બેંક ટ્રાન્સફર">બેંક ટ્રાન્સફર (NEFT)</option>
+                <option value="ચેક">ચેક (Cheque)</option>
+              </select>
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">રિસીપ્ટ / વિશેષ નોંધ</label>
+            <input type="text" id="expenseNotesInput" placeholder="રિસીપ્ટ નંબર અથવા વિગત" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            ખર્ચ ઉમેરો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 5: Add Contact Modal -->
+    <div id="modalAddContact" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">નવો સંપર્ક ઉમેરો</h3>
+          <button onclick="closeModal('modalAddContact')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddContact(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">વ્યક્તિ / પેઢીનું નામ *</label>
+            <input type="text" id="contactNameInput" required placeholder="દા.ત. શાસ્ત્રીજી મુકેશભાઈ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">કામગીરી / હોદ્દો *</label>
+              <input type="text" id="contactRoleInput" required placeholder="દા.ત. મુખ્ય ગોર મહારાજ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">શ્રેણી</label>
+              <select id="contactCategoryInput" class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+                <option value="પૂજા વિધિ">પૂજા વિધિ / ગોર</option>
+                <option value="કેટરિંગ">કેટરર્સ / રસોઈયા</option>
+                <option value="સ્થળ વ્યવસ્થા">વાડી / હોલ</option>
+                <option value="ફોટો-વીડિયો">ફોટોગ્રાફર</option>
+                <option value="ડેકોરેશન">ડેકોરેશન / સાઉન્ડ</option>
+                <option value="પરિવાર">પરિવારના સંયોજક</option>
+                <option value="સેવા">અન્ય સેવા</option>
+              </select>
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">મોબાઇલ નંબર *</label>
+              <input type="tel" id="contactPhoneInput" required placeholder="98250..." class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">અન્ય નંબર</label>
+              <input type="tel" id="contactAltPhoneInput" placeholder="ઓપ્શનલ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">સરનામું / વિગતવાર નોંધ</label>
+            <input type="text" id="contactNotesInput" placeholder="વિસ્તાર અથવા વ્યવસ્થાની વિગત" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            સંપર્ક સાચવો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 6: Add Program Schedule Modal -->
+    <div id="modalAddProgram" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">વિધિ / કાર્યક્રમ ઉમેરો</h3>
+          <button onclick="closeModal('modalAddProgram')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddProgram(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">કાર્યક્રમ / વિધિનું નામ *</label>
+            <input type="text" id="programTitleInput" required placeholder="દા.ત. ભિક્ષાવળ અને કાશીયાત્રા વિધિ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">તારીખ *</label>
+              <input type="date" id="programDateInput" required class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">શુભ મુહૂર્ત / સમય *</label>
+              <input type="text" id="programTimeInput" required placeholder="દા.ત. સવારે ૦૮:૧૫ થી ૧૦:૦૦" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">સ્થળ (Venue)</label>
+            <input type="text" id="programVenueInput" placeholder="દા.ત. શ્રી ઉમિયા વાડી, મુખ્ય હોલ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">શાસ્ત્રીજી / ઈનચાર્જ વ્યક્તિ</label>
+            <input type="text" id="programPriestInput" placeholder="દા.ત. શાસ્ત્રીજી હરેશભાઈ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">વિધિનું મહત્વ / વિશેષ સૂચના</label>
+            <textarea id="programNotesInput" rows="2" placeholder="મહેમાનો માટે બેઠક વ્યવસ્થા અને પૂજા નિયમો" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300"></textarea>
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            કાર્યક્રમ ઉમેરો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 7: Add Shagun (Chandalo) Modal -->
+    <div id="modalAddShagun" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">ચાંદલો / ભેટ નોંધણી</h3>
+          <button onclick="closeModal('modalAddShagun')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddShagun(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">આપનારનું પૂરું નામ *</label>
+            <input type="text" id="shagunNameInput" required placeholder="દા.ત. રમેશભાઈ ગોવિંદભાઈ પટેલ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">સંબંધ / સગપણ</label>
+              <input type="text" id="shagunRelationInput" placeholder="દા.ત. મોટા કાકા / મામા" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">ગામ / શહેર</label>
+              <input type="text" id="shagunVillageInput" placeholder="દા.ત. ગાંધીનગર" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">ચાંદલાની રકમ (₹) *</label>
+              <input type="number" id="shagunAmountInput" required placeholder="દા.ત. 5100" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300 font-bold">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">અન્ય ભેટની વિગત</label>
+              <input type="text" id="shagunGiftInput" placeholder="દા.ત. ચાંદીનો સિક્કો" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            ચાંદલો સાચવો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 8: Add Samagri Modal -->
+    <div id="modalAddSamagri" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">પૂજા સામગ્રી ઉમેરો</h3>
+          <button onclick="closeModal('modalAddSamagri')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitAddSamagri(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">વસ્તુનું નામ *</label>
+            <input type="text" id="samagriNameInput" required placeholder="દા.ત. પલાશનો દંડ અથવા કમંડળ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">જથ્થો (Quantity)</label>
+              <input type="text" id="samagriQtyInput" placeholder="દા.ત. 1 નંગ / 500 ગ્રામ" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">કોણ લાવશે?</label>
+              <input type="text" id="samagriArrangedByInput" placeholder="દા.ત. શાસ્ત્રીજી / મામા" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            સામગ્રી ઉમેરો
+          </button>
+        </form>
+      </div>
+    </div>
+
+    <!-- Modal 9: Settings / Ceremony Details Modal -->
+    <div id="modalSettings" class="fixed inset-0 bg-black/60 backdrop-blur-sm z-50 flex items-center justify-center p-4 hidden">
+      <div class="bg-white rounded-3xl p-5 max-w-sm w-full shadow-2xl border border-amber-300 max-h-[90vh] overflow-y-auto">
+        <div class="flex items-center justify-between mb-3">
+          <h3 class="text-base font-bold text-gray-800">પ્રસંગની મુખ્ય વિગતો</h3>
+          <button onclick="closeModal('modalSettings')" class="text-gray-400 hover:text-gray-600">✕</button>
+        </div>
+        <form onsubmit="submitSaveSettings(event)" class="space-y-3 text-xs">
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">દીકરાનું નામ (કુમાર) *</label>
+            <input type="text" id="settingsBoyName" required class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300 font-bold">
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">પિતાશ્રીનું નામ</label>
+              <input type="text" id="settingsFatherName" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">માતાશ્રીનું નામ</label>
+              <input type="text" id="settingsMotherName" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+          </div>
+          <div class="grid grid-cols-2 gap-2">
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">મુખ્ય પ્રસંગ તારીખ *</label>
+              <input type="date" id="settingsEventDate" required class="w-full px-2 py-2 bg-gray-50 rounded-xl border border-gray-300">
+            </div>
+            <div>
+              <label class="block font-semibold text-gray-700 mb-1">કુલ બજેટ લક્ષ્યાંક (₹)</label>
+              <input type="number" id="settingsBudget" class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300 font-bold">
+            </div>
+          </div>
+          <div>
+            <label class="block font-semibold text-gray-700 mb-1">પ્રસંગ સ્થળ (Venue) *</label>
+            <input type="text" id="settingsVenue" required class="w-full px-3 py-2 bg-gray-50 rounded-xl border border-gray-300">
+          </div>
+          <button type="submit" class="w-full py-2.5 rounded-xl bg-amber-600 text-white font-bold text-sm shadow hover:bg-amber-700 mt-2">
+            વિગતો અપડેટ કરો
+          </button>
+        </form>
+      </div>
+    </div>
+
+  </div> <!-- End App Container -->
+
+  <script src="/static/app.js"></script>
+</body>
+</html>

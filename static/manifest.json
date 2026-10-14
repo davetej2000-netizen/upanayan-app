@@ -1,0 +1,17 @@
+{
+  "name": "યજ્ઞોપવીત મહોત્સવ - ઉપનયન સંસ્કાર સહાયક",
+  "short_name": "જનોઈ સહાયક",
+  "description": "ઉપનયન સંસ્કાર (જનોઈ) માટે ખર્ચ, સંપર્ક, કાર્યક્રમ, કાર્યો અને લાઈવ રીયલ-ટાઇમ સંકલન એપ્લિકેશન",
+  "start_url": "/static/index.html",
+  "display": "standalone",
+  "background_color": "#FFFBEB",
+  "theme_color": "#D97706",
+  "orientation": "portrait",
+  "icons": [
+    {
+      "src": "/static/icon.svg",
+      "sizes": "192x192 512x512",
+      "type": "image/svg+xml"
+    }
+  ]
+}
